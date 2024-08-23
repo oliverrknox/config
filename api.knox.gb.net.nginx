@@ -1,0 +1,41 @@
+# HTTP server to redirect traffic to HTTPS
+server {
+    listen 80;
+    server_name api.knox.gb.net;
+
+    # Redirect all HTTP requests to HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# HTTPS server
+server {
+    listen 443 ssl;
+    server_name api.knox.gb.net;
+
+    ssl_certificate /etc/letsencrypt/live/api.knox.gb.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.knox.gb.net/privkey.pem;
+
+    # SSL parameters
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    location /keycloak/ {
+	proxy_pass http://localhost:9025;
+        rewrite ^/keycloak/(.*)$ /$1 break;
+    }
+
+    location /pgadmin/ {
+	proxy_pass http://localhost:5454;
+	proxy_set_header X-Script-Name /pgadmin;
+    }
+
+    location /nudge-gateway/ {
+        proxy_pass http://localhost:8080;
+	rewrite ^/nudge-gateway/(.*)$ /$1 break;
+	sub_filter '/v3/api-docs' '/nudge-gateway/v3/api-docs';
+        sub_filter_once off;
+        sub_filter_types *;
+    }
+}
