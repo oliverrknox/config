@@ -6,6 +6,7 @@ A collection of helpful configuration files.
 
 https://nginx.org
 
-**Description**
+The following are my Nginx configurations:
 
-The [config](./api.knox.gb.net.nginx) for my API server's reverse proxy. 
+- [API](./api.oliverknox.io.nginx)
+- [Portfolio](./oliverknox.io.nginx)
